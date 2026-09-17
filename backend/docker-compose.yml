@@ -7,8 +7,7 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5433:5432"   # ← changé ici (avant : "5432:5432")
+    
 
   web:
     build: .
@@ -25,6 +24,6 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_PORT=5432  
-
+  
 volumes:
   postgres_data:
