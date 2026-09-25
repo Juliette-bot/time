@@ -1,0 +1,9 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["**/migrations/**"]
+
+[tool.ruff.lint]
+# E/W : style PEP 8 · F : erreurs (imports inutiles, variables non définies…)
+# I : ordre des imports
+select = ["E", "W", "F", "I"]

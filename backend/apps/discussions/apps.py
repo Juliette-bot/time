@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class DiscussionsConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'apps.discussions'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.discussions"
