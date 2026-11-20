@@ -6,3 +6,4 @@ venv/
 !.vscode/settings.json
 ...db.sqlite3
 db.sqlite3
+.env
