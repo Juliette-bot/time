@@ -17,7 +17,10 @@ services:
       retries: 5
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      args:
+        FLYWAY_LOCATIONS: ${FLYWAY_LOCATIONS:-db/migration}
     restart: unless-stopped
     environment:
       DB_URL: jdbc:postgresql://db:5432/${DB_NAME}

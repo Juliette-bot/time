@@ -1,10 +1,11 @@
 # ---------- Stage 1: build ----------
 FROM maven:3.9-eclipse-temurin-21 AS build
+ARG FLYWAY_LOCATIONS=db/migration
 WORKDIR /build
 COPY pom.xml .
 COPY src ./src
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn -B -q package -DskipTests
+    mvn -B -q package -DskipTests -Dquarkus.flyway.locations=${FLYWAY_LOCATIONS}
 
 # ---------- Stage 2: run ----------
 FROM eclipse-temurin:21-jre-alpine
