@@ -1,6 +1,5 @@
 package org.echangedetemps.listing;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import org.echangedetemps.user.User;
 import org.hibernate.annotations.CreationTimestamp;
@@ -10,42 +9,112 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "listing")
-public class Listing extends PanacheEntityBase {
+public class Listing {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    private Long id;
 
     @Column(nullable = false)
-    public String title;
+    private String title;
 
     @Column(nullable = false)
-    public String description;
+    private String description;
 
     @Column(nullable = false)
-    public ListingType type = ListingType.OFFER;
+    private ListingType type = ListingType.OFFER;
 
     @Column(nullable = false)
-    public ListingStatus status = ListingStatus.PENDING;
+    private ListingStatus status = ListingStatus.PENDING;
 
     @Column(name = "duration_minutes")
-    public Integer durationMinutes;
+    private Integer durationMinutes;
 
     /** Who published the listing */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "author_id", nullable = false)
-    public User author;
+    private User author;
 
     /** Who answered it (null while nobody has) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requester_id")
-    public User requester;
+    private User requester;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    public Instant createdAt;
+    private Instant createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    public Instant updatedAt;
+    private Instant updatedAt;
+
+    // ----- Getters / setters -----
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public ListingType getType() {
+        return type;
+    }
+
+    public void setType(ListingType type) {
+        this.type = type;
+    }
+
+    public ListingStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ListingStatus status) {
+        this.status = status;
+    }
+
+    public Integer getDurationMinutes() {
+        return durationMinutes;
+    }
+
+    public void setDurationMinutes(Integer durationMinutes) {
+        this.durationMinutes = durationMinutes;
+    }
+
+    public User getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(User author) {
+        this.author = author;
+    }
+
+    public User getRequester() {
+        return requester;
+    }
+
+    public void setRequester(User requester) {
+        this.requester = requester;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
 }

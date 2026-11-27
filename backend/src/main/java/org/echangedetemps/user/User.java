@@ -1,48 +1,106 @@
 package org.echangedetemps.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
-import java.util.Optional;
 
 @Entity
 @Table(name = "users")
-public class User extends PanacheEntityBase {
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    private Long id;
 
     @Column(nullable = false, unique = true)
-    public String email;
+    private String email;
 
-    @JsonIgnore // never send the hash to the front-end
     @Column(name = "password_hash", nullable = false)
-    public String passwordHash;
+    private String passwordHash;
 
     @Column(name = "first_name")
-    public String firstName;
+    private String firstName;
 
     @Column(name = "last_name")
-    public String lastName;
+    private String lastName;
 
     @Column(nullable = false)
-    public Role role = Role.USER;
+    private Role role = Role.USER;
 
     @Column(name = "postal_code", length = 5)
-    public String postalCode;
+    private String postalCode;
 
     @Column(nullable = false)
-    public boolean active = true;
+    private boolean active = true;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    public Instant createdAt;
+    private Instant createdAt;
 
-    public static Optional<User> findByEmail(String email) {
-        return find("email", email).firstResultOptional();
+    // ----- Getters / setters -----
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 }

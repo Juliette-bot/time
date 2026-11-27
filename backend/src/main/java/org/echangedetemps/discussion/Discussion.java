@@ -1,6 +1,5 @@
 package org.echangedetemps.discussion;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import org.echangedetemps.listing.Listing;
 import org.echangedetemps.user.User;
@@ -12,16 +11,16 @@ import java.util.Set;
 
 @Entity
 @Table(name = "discussion")
-public class Discussion extends PanacheEntityBase {
+public class Discussion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    private Long id;
 
     /** One discussion per listing */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "listing_id", unique = true)
-    public Listing listing;
+    private Listing listing;
 
     /** Join table discussion_participant (was UserDiscussion in Django) */
     @ManyToMany
@@ -30,12 +29,38 @@ public class Discussion extends PanacheEntityBase {
             joinColumns = @JoinColumn(name = "discussion_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    public Set<User> participants = new HashSet<>();
+    private Set<User> participants = new HashSet<>();
 
     @OneToMany(mappedBy = "discussion")
     @OrderBy("sentAt ASC")
-    public List<Message> messages = new ArrayList<>();
+    private List<Message> messages = new ArrayList<>();
 
     @OneToMany(mappedBy = "discussion")
-    public List<Proposal> proposals = new ArrayList<>();
+    private List<Proposal> proposals = new ArrayList<>();
+
+    // ----- Getters / setters -----
+
+    public Long getId() {
+        return id;
+    }
+
+    public Listing getListing() {
+        return listing;
+    }
+
+    public void setListing(Listing listing) {
+        this.listing = listing;
+    }
+
+    public Set<User> getParticipants() {
+        return participants;
+    }
+
+    public List<Message> getMessages() {
+        return messages;
+    }
+
+    public List<Proposal> getProposals() {
+        return proposals;
+    }
 }

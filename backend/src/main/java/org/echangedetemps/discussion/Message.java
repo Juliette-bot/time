@@ -1,6 +1,5 @@
 package org.echangedetemps.discussion;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import org.echangedetemps.user.User;
 import org.hibernate.annotations.CreationTimestamp;
@@ -9,24 +8,58 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "message")
-public class Message extends PanacheEntityBase {
+public class Message {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "discussion_id", nullable = false)
-    public Discussion discussion;
+    private Discussion discussion;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "author_id", nullable = false)
-    public User author;
+    private User author;
 
     @Column(nullable = false)
-    public String content;
+    private String content;
 
     @CreationTimestamp
     @Column(name = "sent_at", nullable = false, updatable = false)
-    public Instant sentAt;
+    private Instant sentAt;
+
+    // ----- Getters / setters -----
+
+    public Long getId() {
+        return id;
+    }
+
+    public Discussion getDiscussion() {
+        return discussion;
+    }
+
+    public void setDiscussion(Discussion discussion) {
+        this.discussion = discussion;
+    }
+
+    public User getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(User author) {
+        this.author = author;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public Instant getSentAt() {
+        return sentAt;
+    }
 }
