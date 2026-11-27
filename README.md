@@ -23,7 +23,7 @@ docker-compose.yml   Local services
 ## Getting started
 
 ```bash
-docker compose up -d
+docker compose up -d db
 cd backend
 ./mvnw quarkus:dev
 ```
