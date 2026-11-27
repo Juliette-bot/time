@@ -1,64 +1,37 @@
-# backend
+# Time — Backend
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+Quarkus REST API of the Time platform. See the [main README](../README.md) for the project overview.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## Architecture
 
-## Running the application in dev mode
+Code is organized by feature (`user`, `listing`, `discussion`, `transaction`), each with Resource / Service / Repository layers and separate request/response DTOs. See [ADR-0003](../docs/adr/0003-organize-backend-by-feature.md) and [ADR-0004](../docs/adr/0004-layered-feature-with-panache-repository.md).
 
-You can run your application in dev mode that enables live coding using:
+## Run in dev mode
 
-```shell script
+```bash
 ./mvnw quarkus:dev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+| What | URL |
+|---|---|
+| API | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/q/swagger-ui |
+| Dev UI | http://localhost:8080/q/dev/ |
+| Health check | http://localhost:8080/q/health |
 
-## Packaging and running the application
+## Database migrations
 
-The application can be packaged using:
+Schema is managed by Flyway: migration scripts are in `src/main/resources/db/migration/`.
 
-```shell script
+## Package
+
+```bash
 ./mvnw package
+java -jar target/quarkus-app/quarkus-run.jar
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+## Extensions
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+Hibernate ORM with Panache, REST Jackson, Hibernate Validator, Flyway, PostgreSQL JDBC, SmallRye Health, SmallRye OpenAPI.
 
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
-```
-
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/backend-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Related Guides
-
-- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplified JPA/Hibernate data access layer with active record and repository patterns
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-- SmallRye Health ([guide](https://quarkus.io/guides/smallrye-health)): Monitor service health
-- Hibernate Validator ([guide](https://quarkus.io/guides/validation)): Bean validation using Hibernate Validator and Jakarta Validation annotations
-- Flyway ([guide](https://quarkus.io/guides/flyway)): Handle your database schema migrations
-- SmallRye OpenAPI ([guide](https://quarkus.io/guides/openapi-swaggerui)): Generate OpenAPI schemas and serve Swagger UI for REST API documentation
-- JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
+More: [API documentation guide](../docs/guides/api-documentation.md).
