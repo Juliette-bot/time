@@ -17,13 +17,14 @@ Open-source mutual aid time-exchange platform: people offer and request services
 backend/             Quarkus REST API
 frontend/            Angular application
 docs/                Documentation (ADRs, guides)
-docker-compose.yml   Local services
+docker-compose.yml   Full stack (database + backend)
 ```
 
 ## Getting started
 
+Docker Desktop must be running: Quarkus Dev Services starts the database automatically.
+
 ```bash
-docker compose up -d db
 cd backend
 ./mvnw quarkus:dev
 ```

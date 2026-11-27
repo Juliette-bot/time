@@ -2,7 +2,10 @@
 
 ## What it is
 
-Docker Compose runs the project services in containers, defined in `docker-compose.yml` at the root of the repository.
+Docker is used in two ways in this project:
+
+- **In development**, Quarkus Dev Services starts a PostgreSQL container automatically. Nothing to configure.
+- **For the full stack** (as in preprod and prod), Docker Compose runs the database and the backend, defined in `docker-compose.yml` at the root of the repository.
 
 | Service | Image / build | Role | Port (host → container) |
 |---|---|---|---|
@@ -13,10 +16,32 @@ The frontend is not containerized.
 
 ## Prerequisites
 
-- Docker Desktop, with WSL integration enabled when working under WSL.
-- A `.env` file at the root of the repository (see below).
+- Docker Desktop running, with WSL integration enabled when working under WSL.
+- For Docker Compose only: a `.env` file at the root of the repository (see below).
 
-## Configuration
+## Development: Quarkus Dev Services
+
+```bash
+cd backend
+./mvnw quarkus:dev
+```
+
+Quarkus starts a PostgreSQL container by itself, then Flyway applies the schema (`db/migration`) and the fictional demo data (`db/demo-data`). No `.env` and no `docker compose` are needed.
+
+| Setting | Value |
+|---|---|
+| Host | `localhost` |
+| Port | `5432` |
+| Database | `echange_temps` |
+| User / password | `dev` / `dev` |
+
+These values are set in `backend/src/main/resources/application.properties` (`quarkus.datasource.devservices.*`). The port is fixed in dev so that a SQL client (DBeaver, IntelliJ) always finds the database. Tests use a random port, so they can run while `quarkus:dev` is running.
+
+The dev database is a throwaway: it is recreated with fresh demo data each time `quarkus:dev` starts.
+
+## Full stack: Docker Compose
+
+### Configuration
 
 Create your `.env` from the example and fill in the values:
 
@@ -29,37 +54,36 @@ cp .env.example .env
 | `DB_NAME` | Database name |
 | `DB_USER` | Database user |
 | `DB_PASSWORD` | Database password |
-| `FLYWAY_LOCATIONS` | Flyway migration folders included in the backend build (default: `db/migration`) |
+| `FLYWAY_LOCATIONS` | Flyway migration folders built into the backend image (see below) |
 
-`.env` contains secrets and must never be committed. Check it is ignored:
+`.env` contains secrets and must never be committed. Check it is ignored (the command must print `.env`):
 
 ```bash
 git check-ignore .env
 ```
 
-## Two ways to run the project
+### Demo data: `FLYWAY_LOCATIONS`
 
-### Development (recommended): database in Docker, backend in dev mode
+| Value | Result |
+|---|---|
+| `db/migration` (default) | Schema only, empty database |
+| `db/migration,db/demo-data` | Schema + fictional demo data |
 
-```bash
-docker compose up -d db
-cd backend
-./mvnw quarkus:dev
-```
+Never load demo data in an environment with real users.
 
-The backend runs with live reload. It connects to the database on `localhost:5433`.
+`FLYWAY_LOCATIONS` is a build argument: after changing it, rebuild the backend image (`--build`).
 
-### Full stack: everything in Docker
+### Run
 
 ```bash
 docker compose up -d --build
 ```
 
-Use this to check the app as it will run in preprod or prod. The backend container waits for the database healthcheck before starting.
+The backend container waits for the database healthcheck before starting.
 
-Do not run both at the same time: the backend container and `quarkus:dev` both use port `8080`.
+Do not run it at the same time as `quarkus:dev`: both use port `8080`. To keep only the database, stop the backend container with `docker compose stop backend`.
 
-## Accessing the database
+### Accessing the database
 
 From the terminal:
 
@@ -67,15 +91,11 @@ From the terminal:
 docker compose exec db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
 ```
 
-From IntelliJ (Database tool window) or any SQL client:
+From a SQL client: host `localhost`, port `5433`, database, user and password from `.env`.
 
-- Host: `localhost`
-- Port: `5433`
-- Database, user, password: values from `.env`
+The Compose database uses port `5433` on the host, so it does not conflict with the Dev Services database on `5432`. Inside the Docker network, the backend reaches it at `db:5432`.
 
-Port `5433` is used on the host to avoid conflicts with a local PostgreSQL on `5432`. Inside the Docker network, the backend reaches the database at `db:5432`.
-
-## Useful commands
+### Useful commands
 
 | Command | Effect |
 |---|---|
@@ -86,137 +106,26 @@ Port `5433` is used on the host to avoid conflicts with a local PostgreSQL on `5
 | `docker compose up -d --build backend` | Rebuild the backend image after code changes |
 | `docker compose down -v` | Remove containers **and delete all database data** |
 
-## Reset the database from scratch
+### Reset the database from scratch
 
 ```bash
 docker compose down -v
-docker compose up -d db
-```
-
-The volume `postgres_data` is deleted, so the database starts empty. Flyway recreates the schema and the demo data at the next backend start.
-
-## Good to know
-
-- `restart: unless-stopped`: containers restart automatically when Docker Desktop starts, until you stop them.
-- `FLYWAY_LOCATIONS` is a build argument: changing it requires rebuilding the backend image (`--build`).
-- Code changes are not visible in the backend container until the image is rebuilt.
-
-## Troubleshooting
-
-| Problem | Fix |
-|---|---|
-| `Port 8080 is already in use` | Stop the backend container: `docker compose stop backend` |
-| `Port 5433 is already in use` | Another service uses it: stop it or change the host port in `docker-compose.yml` |
-| `The "DB_NAME" variable is not set` | The `.env` file is missing or incomplete |
-| Backend container keeps restarting | Check logs: `docker compose logs backend` |
-EOFcat > docs/guides/docker.md << 'EOF'
-# Guide: Docker
-
-## What it is
-
-Docker Compose runs the project services in containers, defined in `docker-compose.yml` at the root of the repository.
-
-| Service | Image / build | Role | Port (host → container) |
-|---|---|---|---|
-| `db` | `postgres:16` | PostgreSQL database | `5433 → 5432` |
-| `backend` | built from `backend/Dockerfile` | Quarkus REST API | `8080 → 8080` |
-
-The frontend is not containerized.
-
-## Prerequisites
-
-- Docker Desktop, with WSL integration enabled when working under WSL.
-- A `.env` file at the root of the repository (see below).
-
-## Configuration
-
-Create your `.env` from the example and fill in the values:
-
-```bash
-cp .env.example .env
-```
-
-| Variable | Used for |
-|---|---|
-| `DB_NAME` | Database name |
-| `DB_USER` | Database user |
-| `DB_PASSWORD` | Database password |
-| `FLYWAY_LOCATIONS` | Flyway migration folders included in the backend build (default: `db/migration`) |
-
-`.env` contains secrets and must never be committed. Check it is ignored:
-
-```bash
-git check-ignore .env
-```
-
-## Two ways to run the project
-
-### Development (recommended): database in Docker, backend in dev mode
-
-```bash
-docker compose up -d db
-cd backend
-./mvnw quarkus:dev
-```
-
-The backend runs with live reload. It connects to the database on `localhost:5433`.
-
-### Full stack: everything in Docker
-
-```bash
 docker compose up -d --build
 ```
 
-Use this to check the app as it will run in preprod or prod. The backend container waits for the database healthcheck before starting.
+The volume `postgres_data` is deleted, so the database starts empty. Flyway recreates the schema (and the demo data if enabled) when the backend starts.
 
-Do not run both at the same time: the backend container and `quarkus:dev` both use port `8080`.
-
-## Accessing the database
-
-From the terminal:
-
-```bash
-docker compose exec db sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
-```
-
-From IntelliJ (Database tool window) or any SQL client:
-
-- Host: `localhost`
-- Port: `5433`
-- Database, user, password: values from `.env`
-
-Port `5433` is used on the host to avoid conflicts with a local PostgreSQL on `5432`. Inside the Docker network, the backend reaches the database at `db:5432`.
-
-## Useful commands
-
-| Command | Effect |
-|---|---|
-| `docker compose ps` | List running services and their status |
-| `docker compose logs -f backend` | Follow backend logs |
-| `docker compose stop` | Stop services, keep containers and data |
-| `docker compose down` | Remove containers, keep data |
-| `docker compose up -d --build backend` | Rebuild the backend image after code changes |
-| `docker compose down -v` | Remove containers **and delete all database data** |
-
-## Reset the database from scratch
-
-```bash
-docker compose down -v
-docker compose up -d db
-```
-
-The volume `postgres_data` is deleted, so the database starts empty. Flyway recreates the schema and the demo data at the next backend start.
-
-## Good to know
+### Good to know
 
 - `restart: unless-stopped`: containers restart automatically when Docker Desktop starts, until you stop them.
-- `FLYWAY_LOCATIONS` is a build argument: changing it requires rebuilding the backend image (`--build`).
 - Code changes are not visible in the backend container until the image is rebuilt.
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---|---|
+| `Could not find a valid Docker environment` | Docker Desktop is not running, or WSL integration is disabled |
+| `Port 5432 is already in use` (dev) | A local PostgreSQL or another container uses it: stop it |
 | `Port 8080 is already in use` | Stop the backend container: `docker compose stop backend` |
 | `Port 5433 is already in use` | Another service uses it: stop it or change the host port in `docker-compose.yml` |
 | `The "DB_NAME" variable is not set` | The `.env` file is missing or incomplete |
