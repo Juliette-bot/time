@@ -2,7 +2,7 @@ name: Backend (Quarkus)
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, preprod]
     paths: ["backend/**", ".github/workflows/backend.yml"]
   pull_request:
     paths: ["backend/**", ".github/workflows/backend.yml"]
